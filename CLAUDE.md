@@ -26,6 +26,8 @@ npm test           # runs scripts/verify.mjs (assertion-based, not a test framew
 
 There is no linter configured. `npm test` is a hand-rolled Node assertion script, not Vitest/Jest — it exercises session logic and greps `router/index.js` for required route guards.
 
+The development adapter seeds one user — `admin` / `admin123` (overridable via `DEV_USERNAME` / `DEV_PASSWORD`, see `config.py`).
+
 ## Architecture
 
 ### Backend (`backend/app/`)
