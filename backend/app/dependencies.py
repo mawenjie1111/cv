@@ -15,20 +15,36 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.config import Settings, get_settings
 from app.core.security import TokenError, decode_access_token
 from app.models.user import User
-from app.repositories.users import DevelopmentUserRepository, UserRepository
+from app.repositories.users import DevelopmentUserRepository, PostgreSQLUserRepository, UserRepository
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
 @lru_cache(maxsize=1)
-def _get_repository() -> DevelopmentUserRepository:
+def _get_repository() -> UserRepository:
     """Create the process-wide user repository instance.
 
-    The current adapter is in-memory and seeded for development. A future SQL
-    adapter can replace this factory while preserving the UserRepository
-    contract used by routes and auth code.
+    The repository stays behind one cached factory so routes and auth code only
+    depend on UserRepository. When DATABASE_URL is configured, PostgreSQL
+    becomes the active adapter; otherwise the development repository remains the
+    local fallback.
     """
     settings = get_settings()
+    return build_user_repository(settings)
+
+
+def build_user_repository(settings: Settings) -> UserRepository:
+    """Select the active repository implementation from runtime settings.
+
+    Args:
+        settings: Runtime configuration including the optional DATABASE_URL.
+
+    Returns:
+        A PostgreSQL-backed repository when DATABASE_URL is configured;
+        otherwise the seeded development repository.
+    """
+    if settings.database_url:
+        return PostgreSQLUserRepository(settings.database_url)
     return DevelopmentUserRepository(settings)
 
 
