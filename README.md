@@ -57,20 +57,20 @@ The backend now auto-selects its repository based on `DATABASE_URL`:
 
 The repository now includes initial PostgreSQL bootstrap scripts under `backend/sql/postgresql/`:
 
-- `backend/sql/postgresql/00_create_database.sql`: creates `cv_app_db` if it does not already exist.
+- `backend/sql/postgresql/00_create_database.sql`: creates `cv_db` if it does not already exist.
 - `backend/sql/postgresql/01_init_schema.sql`: creates the `cv_app` schema plus `cv_profiles` and `users` tables, constraints, comments, and indexes.
 
 Example bootstrap commands:
 
 ```bash
 psql -U postgres -d postgres -f backend/sql/postgresql/00_create_database.sql
-psql -U postgres -d cv_app_db -f backend/sql/postgresql/01_init_schema.sql
+psql -U postgres -d cv_db -f backend/sql/postgresql/01_init_schema.sql
 ```
 
 Example PostgreSQL connection string:
 
 ```bash
-DATABASE_URL=postgresql://cv_app:change-me@localhost:5432/cv_app_db
+DATABASE_URL=postgresql://postgres:123456@localhost:5432/cv_db
 ```
 
 Seed PostgreSQL users with hashed passwords only:
