@@ -5,6 +5,7 @@ description = "FastAPI backend with login and a replaceable user repository boun
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",
+  "psycopg[binary]>=3.2.0",
   "uvicorn[standard]>=0.30.0",
 ]
 

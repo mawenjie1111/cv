@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { clearSession, createEmptySession, loadSession, saveSession, SESSION_KEY } from '../src/auth/session.js'
+import { createApiError } from '../src/services/api.js'
 
 function createStorage() {
   const values = new Map()
@@ -27,6 +28,13 @@ assert.deepEqual(loadSession(storage), { token: 'abc', user: { username: 'admin'
 
 clearSession(storage)
 assert.deepEqual(loadSession(storage), { token: '', user: null })
+
+const accountNotFoundError = createApiError({
+  detail: 'Account not found',
+  error_code: 'account_not_found'
+})
+assert.equal(accountNotFoundError.message, '账号不存在')
+assert.equal(accountNotFoundError.code, 'account_not_found')
 
 const routerSource = await readFile(new URL('../src/router/index.js', import.meta.url), 'utf8')
 assert.match(routerSource, /requiresAuth:\s*true/)

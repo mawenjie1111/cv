@@ -48,7 +48,45 @@ Authentication routes call the `UserRepository` interface in `backend/app/reposi
 - `get_user_by_username(username)`
 - `get_user_by_id(user_id)`
 
-Then update the repository factory in `backend/app/dependencies.py` to return the concrete adapter based on `DATABASE_URL` or another environment setting.
+The backend now auto-selects its repository based on `DATABASE_URL`:
+
+- When `DATABASE_URL` is unset, it uses `DevelopmentUserRepository`.
+- When `DATABASE_URL` is set, it uses the PostgreSQL-backed repository and reads users from `cv_app.users`.
+
+## PostgreSQL Bootstrap
+
+The repository now includes initial PostgreSQL bootstrap scripts under `backend/sql/postgresql/`:
+
+- `backend/sql/postgresql/00_create_database.sql`: creates `cv_app_db` if it does not already exist.
+- `backend/sql/postgresql/01_init_schema.sql`: creates the `cv_app` schema plus `cv_profiles` and `users` tables, constraints, comments, and indexes.
+
+Example bootstrap commands:
+
+```bash
+psql -U postgres -d postgres -f backend/sql/postgresql/00_create_database.sql
+psql -U postgres -d cv_app_db -f backend/sql/postgresql/01_init_schema.sql
+```
+
+Example PostgreSQL connection string:
+
+```bash
+DATABASE_URL=postgresql://cv_app:change-me@localhost:5432/cv_app_db
+```
+
+Seed PostgreSQL users with hashed passwords only:
+
+```bash
+cd backend
+python -c "from app.core.security import hash_password; print(hash_password('admin123'))"
+```
+
+The `users` table now includes `display_name` because authenticated profile responses expose that field to the frontend.
+
+## Authentication Notes
+
+- Unknown usernames return `error_code: account_not_found`, which the frontend maps to `账号不存在`.
+- Wrong passwords return `error_code: invalid_password`.
+- The registration route `POST /api/auth/register` is reserved and currently returns `501 Not Implemented`.
 
 ## Verification
 
